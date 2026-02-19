@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: payments
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
@@ -26,8 +28,13 @@ services:
   celery:
     build: .
     command: celery -A payments worker --loglevel=info
+    volumes:
+      - .:/app
     env_file:
       - .env
     depends_on:
       - db
       - redis
+
+volumes:
+  postgres_data:
