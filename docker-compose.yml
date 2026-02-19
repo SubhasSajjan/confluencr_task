@@ -1,0 +1,33 @@
+services:
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  redis:
+    image: redis:7
+
+  web:
+    build: .
+    command: gunicorn payments.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  celery:
+    build: .
+    command: celery -A payments worker --loglevel=info
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
